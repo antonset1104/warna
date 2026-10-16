@@ -1,5 +1,7 @@
 """Build Warna Terukur: a bilingual color literacy site and browser-only tools."""
 from __future__ import annotations
+
+ADS_LOADER = '<script defer src="https://vijeron.com/assets/vijeron-ads.js"></script>'
 import html
 import json
 import shutil
@@ -40,7 +42,7 @@ def head(lang: str, suffix: str, title: str, description: str, kind="WebPage", a
     if kind == "Article": schema.update({"headline":title,"mainEntityOfPage":{"@type":"WebPage","@id":url}})
     if kind == "WebApplication": schema.update({"applicationCategory":"UtilityApplication","operatingSystem":"Web"})
     scripts = ("<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('consent','default',{ad_storage:'denied',analytics_storage:'denied',ad_user_data:'denied',ad_personalization:'denied',wait_for_update:500});</script><script async src='https://fundingchoicesmessages.google.com/i/pub-6180580801533680?ers=1'></script><script async src='https://www.googletagmanager.com/gtag/js?id=G-79X7K7H4MJ'></script><script>gtag('js',new Date());gtag('config','G-79X7K7H4MJ');</script><script async crossorigin='anonymous' src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6180580801533680'></script>") if ads else ""
-    return (f"<!doctype html><html lang='{lang}'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>{esc(title)} | Vijeron</title><meta name='description' content='{esc(description)}'><meta name='theme-color' content='#25194a'><link rel='canonical' href='{esc(url)}'>{hreflang}<link rel='icon' type='image/svg+xml' href='/assets/icon.svg'><link rel='stylesheet' href='/assets/site.css'><meta property='og:type' content='{'article' if kind=='Article' else 'website'}'><meta property='og:title' content='{esc(title)}'><meta property='og:description' content='{esc(description)}'><meta property='og:url' content='{esc(url)}'><script type='application/ld+json'>{json.dumps(schema,ensure_ascii=False).replace('<','\\u003c')}</script>{scripts}<script defer src=https://vijeron.com/assets/vijeron-ads.js></script></head><body>")
+    return (f"<!doctype html><html lang='{lang}'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>{esc(title)} | Vijeron</title><meta name='description' content='{esc(description)}'><meta name='theme-color' content='#25194a'><link rel='canonical' href='{esc(url)}'>{hreflang}<link rel='icon' type='image/svg+xml' href='/assets/icon.svg'><link rel='stylesheet' href='/assets/site.css'><meta property='og:type' content='{'article' if kind=='Article' else 'website'}'><meta property='og:title' content='{esc(title)}'><meta property='og:description' content='{esc(description)}'><meta property='og:url' content='{esc(url)}'><script type='application/ld+json'>{json.dumps(schema,ensure_ascii=False).replace('<','\\u003c')}</script>{scripts}{ADS_LOADER if ads else ''}</head><body>")
 
 def chrome(lang: str, suffix: str) -> str:
     t=T[lang]; other="en" if lang=="id" else "id"
@@ -94,7 +96,7 @@ def info_page(lang: str, kind: str) -> None:
     blocks="".join(f"<section class='prose-section'><h2>{esc(h)}</h2><p>{esc(p)}</p></section>" for h,p in sections)
     refs=f"<section class='references'><h2>{esc(t['references'])}</h2>{references(list(SOURCES))}</section>" if kind=="metode" else ""
     body=f"<main id='main' class='wrap info-page'><nav class='crumb'><a href='{route(lang)}'>{esc(t['home'])}</a> / {esc(title)}</nav><p class='eyebrow'>VIJERON / COLOR DESK</p><h1>{esc(title)}</h1><p class='lead'>{esc(desc)}</p><div class='prose'>{blocks}{refs}</div></main>"
-    write(route(lang,suffix)+"index.html",head(lang,suffix,title,desc,ads=kind!="privasi")+chrome(lang,suffix)+body+footer(lang));record(lang,suffix)
+    write(route(lang,suffix)+"index.html",head(lang,suffix,title,desc,ads=False)+chrome(lang,suffix)+body+footer(lang));record(lang,suffix)
 
 def main() -> None:
     if OUT.exists(): shutil.rmtree(OUT)

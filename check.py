@@ -51,7 +51,9 @@ def main():
             assert page.schemas[0]['@type']=='WebApplication'
             assert "id='calculator'" in source and "aria-live='polite'" in source
         assert 'Product' not in source
-        if '/privasi/' in path: assert 'adsbygoogle.js' not in source
+        if any(section in path for section in ('/privasi/', '/tentang/', '/metode/')):
+            assert 'adsbygoogle.js' not in source
+            assert 'vijeron-ads.js' not in source
         else:
             assert source.index("gtag('consent','default'") < source.index('gtag/js?id=')
             assert 'ca-pub-6180580801533680' in source
