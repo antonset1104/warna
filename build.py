@@ -13,6 +13,7 @@ ROOT = Path(__file__).resolve().parent
 OUT = ROOT / "dist"
 SITE = "https://warna.vijeron.com"
 DATE = "2026-10-10"
+MONETAG_VERIFICATION = '<meta name="monetag" content="df9eb8a402db9fd37f4490859ed0e48b">'
 URLS: list[str] = []
 
 T = {
@@ -36,13 +37,14 @@ def record(lang: str, suffix: str = "") -> None: URLS.append(SITE + route(lang, 
 
 def head(lang: str, suffix: str, title: str, description: str, kind="WebPage", ads=True) -> str:
     url = SITE + route(lang, suffix)
+    monetag_verification = MONETAG_VERIFICATION if lang == "id" and not suffix else ""
     hreflang = "".join(f"<link rel='alternate' hreflang='{l}' href='{esc(SITE + route(l, suffix))}'>" for l in ("id", "en"))
     hreflang += f"<link rel='alternate' hreflang='x-default' href='{SITE + route('id', suffix)}'>"
     schema = {"@context":"https://schema.org","@type":kind,"name":title,"description":description,"url":url,"inLanguage":lang,"datePublished":DATE,"dateModified":DATE,"author":{"@type":"Organization","name":"Vijeron","url":"https://vijeron.com/"},"publisher":{"@type":"Organization","name":"Vijeron","url":"https://vijeron.com/"},"isPartOf":{"@type":"WebSite","name":"Warna Terukur | Vijeron","url":SITE+"/"}}
     if kind == "Article": schema.update({"headline":title,"mainEntityOfPage":{"@type":"WebPage","@id":url}})
     if kind == "WebApplication": schema.update({"applicationCategory":"UtilityApplication","operatingSystem":"Web"})
     scripts = ("<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('consent','default',{ad_storage:'denied',analytics_storage:'denied',ad_user_data:'denied',ad_personalization:'denied',wait_for_update:500});</script><script async src='https://fundingchoicesmessages.google.com/i/pub-6180580801533680?ers=1'></script><script async src='https://www.googletagmanager.com/gtag/js?id=G-79X7K7H4MJ'></script><script>gtag('js',new Date());gtag('config','G-79X7K7H4MJ');</script><script async crossorigin='anonymous' src='https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6180580801533680'></script>") if ads else ""
-    return (f"<!doctype html><html lang='{lang}'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>{esc(title)} | Vijeron</title><meta name='description' content='{esc(description)}'><meta name='theme-color' content='#25194a'><link rel='canonical' href='{esc(url)}'>{hreflang}<link rel='icon' type='image/svg+xml' href='/assets/icon.svg'><link rel='stylesheet' href='/assets/site.css'><meta property='og:type' content='{'article' if kind=='Article' else 'website'}'><meta property='og:title' content='{esc(title)}'><meta property='og:description' content='{esc(description)}'><meta property='og:url' content='{esc(url)}'><script type='application/ld+json'>{json.dumps(schema,ensure_ascii=False).replace('<','\\u003c')}</script>{scripts}{ADS_LOADER if ads else ''}<script defer src=https://vijeron.com/assets/vijeron-share.js></script></head><body>")
+    return (f"<!doctype html><html lang='{lang}'><head><meta charset='utf-8'>{monetag_verification}<meta name='viewport' content='width=device-width,initial-scale=1'><title>{esc(title)} | Vijeron</title><meta name='description' content='{esc(description)}'><meta name='theme-color' content='#25194a'><link rel='canonical' href='{esc(url)}'>{hreflang}<link rel=\"icon\" type=\"image/png\" href=\"https://vijeron.com/assets/vijeron-mark.png\"><link rel='stylesheet' href='/assets/site.css'><meta property='og:type' content='{'article' if kind=='Article' else 'website'}'><meta property='og:title' content='{esc(title)}'><meta property='og:description' content='{esc(description)}'><meta property='og:url' content='{esc(url)}'><script type='application/ld+json'>{json.dumps(schema,ensure_ascii=False).replace('<','\\u003c')}</script>{scripts}{ADS_LOADER if ads else ''}<script defer src=\"https://vijeron.com/assets/vijeron-share.js\"></script>\n  <script defer src=\"https://vijeron.com/assets/vijeron-brand.js\"></script></head><body>")
 
 def chrome(lang: str, suffix: str) -> str:
     t=T[lang]; other="en" if lang=="id" else "id"
