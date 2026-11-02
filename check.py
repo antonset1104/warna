@@ -66,7 +66,7 @@ def main():
     assert (ROOT/'robots.txt').read_text().count(SITE+'/sitemap.xml')==1
     review=(ROOT/'uji-iklan-monetag/index.html').read_text(encoding='utf-8')
     assert '<meta name=\'robots\' content=\'noindex,nofollow\'>' in review
-    assert 'monetag_review' in review and 'nap5k.com/tag.min.js' in review
+    assert 'nap5k.com/tag.min.js' not in review
     assert 'adsbygoogle.js' not in review and 'vijeron-ads.js' not in review
     assert '/uji-iklan-monetag/' not in '\n'.join(urls)
     assert 'pub-6180580801533680' in (ROOT/'ads.txt').read_text()

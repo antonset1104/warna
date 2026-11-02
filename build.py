@@ -14,6 +14,7 @@ OUT = ROOT / "dist"
 SITE = "https://warna.vijeron.com"
 DATE = "2026-10-10"
 MONETAG_VERIFICATION = '<meta name="monetag" content="df9eb8a402db9fd37f4490859ed0e48b">'
+MONETAG_REVIEW_ENABLED = False
 MONETAG_REVIEW_TAG = (
     '<script data-cfasync="false">'
     "if(location.hostname==='warna.vijeron.com'&&new URLSearchParams(location.search).get('monetag_review')==='1'){"
@@ -113,7 +114,8 @@ def monetag_review_page() -> None:
     review_head = head("id", "uji-iklan-monetag/", guide["title"], guide["summary"], "Article", ads=False)
     review_head = review_head.replace(
         "<meta charset='utf-8'>",
-        "<meta charset='utf-8'><meta name='robots' content='noindex,nofollow'>" + MONETAG_REVIEW_TAG,
+        "<meta charset='utf-8'><meta name='robots' content='noindex,nofollow'>"
+        + (MONETAG_REVIEW_TAG if MONETAG_REVIEW_ENABLED else ""),
         1,
     )
     write("uji-iklan-monetag/index.html", review_head + body)
