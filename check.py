@@ -39,6 +39,7 @@ def main():
         file=ROOT/path.lstrip('/')/'index.html'
         assert file.is_file(),url
         source=file.read_text(encoding='utf-8')
+        assert 'nap5k.com/tag.min.js' not in source,url
         page=Page(); page.feed(source)
         assert page.lang in ('id','en') and page.h1==page.main==1,url
         assert page.meta['canonical']==url and len(page.meta['description'])>50,url
@@ -63,6 +64,11 @@ def main():
                 if not target: continue
                 assert (ROOT/target.lstrip('/')/'index.html').exists() or (ROOT/target.lstrip('/')).exists(),(url,href)
     assert (ROOT/'robots.txt').read_text().count(SITE+'/sitemap.xml')==1
+    review=(ROOT/'uji-iklan-monetag/index.html').read_text(encoding='utf-8')
+    assert '<meta name=\'robots\' content=\'noindex,nofollow\'>' in review
+    assert 'monetag_review' in review and 'nap5k.com/tag.min.js' in review
+    assert 'adsbygoogle.js' not in review and 'vijeron-ads.js' not in review
+    assert '/uji-iklan-monetag/' not in '\n'.join(urls)
     assert 'pub-6180580801533680' in (ROOT/'ads.txt').read_text()
     assert (ROOT/'404.html').exists()
     print(f'Checked {len(urls)} public pages, locale links, schemas, ads, consent and local links')

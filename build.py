@@ -14,6 +14,12 @@ OUT = ROOT / "dist"
 SITE = "https://warna.vijeron.com"
 DATE = "2026-10-10"
 MONETAG_VERIFICATION = '<meta name="monetag" content="df9eb8a402db9fd37f4490859ed0e48b">'
+MONETAG_REVIEW_TAG = (
+    '<script data-cfasync="false">'
+    "if(location.hostname==='warna.vijeron.com'&&new URLSearchParams(location.search).get('monetag_review')==='1'){"
+    "(function(s){s.dataset.zone='12175110',s.src='https://nap5k.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))"
+    "}</script>"
+)
 URLS: list[str] = []
 
 T = {
@@ -100,6 +106,18 @@ def info_page(lang: str, kind: str) -> None:
     body=f"<main id='main' class='wrap info-page'><nav class='crumb'><a href='{route(lang)}'>{esc(t['home'])}</a> / {esc(title)}</nav><p class='eyebrow'>VIJERON / COLOR DESK</p><h1>{esc(title)}</h1><p class='lead'>{esc(desc)}</p><div class='prose'>{blocks}{refs}</div></main>"
     write(route(lang,suffix)+"index.html",head(lang,suffix,title,desc,ads=False)+chrome(lang,suffix)+body+footer(lang));record(lang,suffix)
 
+def monetag_review_page() -> None:
+    guide = GUIDES[0]["id"]
+    source = (OUT / "panduan" / GUIDES[0]["slug"] / "index.html").read_text(encoding="utf-8")
+    body = source.split("</head><body>", 1)[1]
+    review_head = head("id", "uji-iklan-monetag/", guide["title"], guide["summary"], "Article", ads=False)
+    review_head = review_head.replace(
+        "<meta charset='utf-8'>",
+        "<meta charset='utf-8'><meta name='robots' content='noindex,nofollow'>" + MONETAG_REVIEW_TAG,
+        1,
+    )
+    write("uji-iklan-monetag/index.html", review_head + body)
+
 def main() -> None:
     if OUT.exists(): shutil.rmtree(OUT)
     (OUT/"assets").mkdir(parents=True)
@@ -109,10 +127,11 @@ def main() -> None:
         for index,guide in enumerate(GUIDES): guide_page(lang,guide,index)
         for kind in ("kontras-warna","variasi-warna"): tool_page(lang,kind)
         for kind in ("metode","tentang","privasi"): info_page(lang,kind)
+    monetag_review_page()
     write("404.html","<!doctype html><html lang='id'><meta charset='utf-8'><title>Halaman tidak ditemukan | Vijeron</title><link rel='stylesheet' href='/assets/site.css'><main class='wrap info-page'><h1>Halaman tidak ditemukan</h1><p>Kembali ke <a href='/'>Warna Terukur</a>.</p></main></html>")
     write("robots.txt",f"User-agent: *\nAllow: /\nSitemap: {SITE}/sitemap.xml\n")
     write("ads.txt","google.com, pub-6180580801533680, DIRECT, f08c47fec0942fa0\n")
-    write("_headers","/*\n  X-Content-Type-Options: nosniff\n  Referrer-Policy: strict-origin-when-cross-origin\n  X-Frame-Options: SAMEORIGIN\n  Permissions-Policy: camera=(), microphone=(), geolocation=()\n  Cache-Control: public, max-age=0, must-revalidate\n\n/assets/*\n  Cache-Control: public, max-age=3600, must-revalidate\n\n/sitemap.xml\n  Content-Type: application/xml; charset=utf-8\n\n/ads.txt\n  Content-Type: text/plain; charset=utf-8\n")
+    write("_headers","/*\n  X-Content-Type-Options: nosniff\n  Referrer-Policy: strict-origin-when-cross-origin\n  X-Frame-Options: SAMEORIGIN\n  Permissions-Policy: camera=(), microphone=(), geolocation=()\n  Cache-Control: public, max-age=0, must-revalidate\n\n/uji-iklan-monetag/*\n  X-Robots-Tag: noindex, nofollow\n\n/assets/*\n  Cache-Control: public, max-age=3600, must-revalidate\n\n/sitemap.xml\n  Content-Type: application/xml; charset=utf-8\n\n/ads.txt\n  Content-Type: text/plain; charset=utf-8\n")
     xml=Element("urlset",xmlns="http://www.sitemaps.org/schemas/sitemap/0.9")
     for url in URLS:
         node=SubElement(xml,"url"); SubElement(node,"loc").text=url; SubElement(node,"lastmod").text=DATE
